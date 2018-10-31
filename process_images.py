@@ -53,5 +53,6 @@ def compute_centroid(array):
 def compute_energy(array):
     return np.sum(array)
 
+
 if __name__ == "__main__":
     main()
