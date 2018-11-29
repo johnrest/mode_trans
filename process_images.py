@@ -8,22 +8,29 @@ import matplotlib.pyplot as plt
 
 def main():
     target_folder = "D:/Research/ModeTransformation/Data/05_10_2018/cropped"
-    file_mask = "I*A320P130*"
+    file_mask = "I0580A*P040*"
+    reference_file = "I1030A330P040*"
     file_extension = ".png"
 
     images_list = glob.glob(os.path.join(target_folder, file_mask))
+    image_reference = glob.glob(os.path.join(target_folder, reference_file))
+
+    # Compute energy value for reference image
+    image = cv2.imread(image_reference[0], cv2.IMREAD_UNCHANGED)
+    array = np.array(image)
+    reference_value = np.sum(array)
 
     energy = []
     for itr, item in enumerate(images_list):
         print("Reading image: ", item)
         image = cv2.imread(item, cv2.IMREAD_UNCHANGED)
         array = np.array(image)
-        energy.append(np.sum(array))
+        energy.append(np.sum(array)/reference_value)
 
     # Normalize the energy
-    energy /= np.max(energy)
-    # t = range(180, 370, 10)                          #Analyzer plot
-    t = [0, 280, 580, 820, 1030, 1210]             # Analyzer plot
+    # energy /= np.max(energy)
+    t = range(180, 370, 10)                          # Analyzer plot
+    # t = [0, 280, 580, 820, 1030, 1210]             # Analyzer plot
 
     fig, ax = plt.subplots()
     ax.plot(t, energy, "r--")

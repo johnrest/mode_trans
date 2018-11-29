@@ -10,7 +10,7 @@ def main():
     file_extension = ".png"
     results_folder = "D:/Research/ModeTransformation/Data/05_10_2018/cropped"
     height, width = (512, 640)
-    crop_height, crop_width = (160, 160)
+    crop_height, crop_width = (160, 160)                # 160x160
 
     images_list = glob.glob(os.path.join(target_folder, file_mask+file_extension))
     print("Processing the following list of images: ")
