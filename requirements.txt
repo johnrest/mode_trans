@@ -1,4 +1,5 @@
 cycler==0.10.0
+ExifRead==2.1.2
 imageio==2.4.1
 kiwisolver==1.0.1
 matplotlib==3.0.0
