@@ -83,5 +83,3 @@ cap.release()
 out.release()
 cv2.destroyAllWindows()
 
-#TODO: test recentiring algorithm with the red channel in a BGR colormap. Since we can not accurately generate the mapping, since the video is not accuretly JET
-
