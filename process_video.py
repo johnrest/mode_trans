@@ -15,11 +15,11 @@ import numpy as np
 import collections
 
 # Parameters
-target_folder = r"D:\Research\ModeTransformation\Data\2019_02_04\vids"
-video_file = r"D:\Research\ModeTransformation\Data\2019_02_04\vids\A340_FAST_HEAT.avi"
+target_folder = r"D:\Research\ModeTransformation\Data\2019_05_14"
+video_file = r"D:\Research\ModeTransformation\Data\2019_05_14\video1802_cut.mp4"
 height, width = (512, 640)
 crop_height, crop_width = (160, 160)                # 160x160
-out_video_file = r"A340_FAST_HEAT_CROPPED.avi"
+out_video_file = r"video1802_cropped.avi"
 
 cap = cv2.VideoCapture(video_file)
 out_video_file = os.path.join(target_folder, out_video_file)

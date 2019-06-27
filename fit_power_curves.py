@@ -1,61 +1,58 @@
 # Script to fit the power measurements for mode transformation efficiency
 
-import os, glob, cv2
+import os
+import glob
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import optimize
-import matplotlib.cm as cm
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+import pickle
+from lmfit import Model
+
 
 def test_func(x, a, b, c, d):
-    return a * np.sin(abs(b) * x - c) + d
+    return a * np.sin(abs(b/(2*np.pi)) * x - c) + d
 
-def test_func_const(x, a, b, c):
-    return a * np.sin(params[1] * x - b) + c
 
+def test_func_const(x, a, c, d):
+    return a * np.sin((params_dict["26"] / (2*np.pi))[1] * x - c) + d
+
+
+# Parameters
 target_folder = "D:/Research/ModeTransformation/Data/2019_03_04/"
-file_mask = "I*285*_newdata.csv"
+base = "195"
+file_mask = "I*" + base + "*_newdata.csv"
 file_list = glob.glob(os.path.join(os.path.join(target_folder, file_mask)))
-
-data = pd.read_csv(file_list[0], sep="\t")
-x_data_full = data["analyzer"]
-
-colors = cm.rainbow(np.linspace(0, 1, len(file_list)))
-
+# colors = cm.rainbow(np.linspace(0, 1, len(file_list)))
 currents = ["140", "280", "410", "530", "640", "740", "830", "910", "990", "1070"]
+temperatures = ["28", "30", "32", "34", "36", "38", "40", "42", "44", "46"]
+
+# Dictionary to store the fitted params for each current
+params_dict = dict()
+
+# Read data for I=0000
+data = pd.read_csv(file_list[0], sep="\t")
+x_data_I0 = data["analyzer"]
+y_data_I0 = 1e6 * data["power_avg"]
+
+# Fit for current I=0000
+init_params = [10, 0.001, 0.0, 20.0]
+
+params_dict["26"], _ = optimize.curve_fit(test_func, x_data_I0, y_data_I0, p0=init_params)
+print(params_dict["26"])
+
+full_model = Model(test_func)
+params = full_model.make_params(a=10, b=0.001, c=0.0, d=20.0)
+result = full_model.fit(y_data_I0, params, x=x_data_I0)
+
+print(full_model.param_names)
+print(full_model.independent_vars)
+print(params)
+print(result.fit_report())
+
 
 phase_bias = []
 
-for itr, item in enumerate(file_list[1:2]):              #loop over the data for I!=0
-    # Load data
-
-    data = pd.read_csv(file_list[0], sep="\t")
-
-    x_data = data["analyzer"]
-    y_data = 1e6*data["power_avg"]
-    y_error = 1e6*data["power_std"]
-
-    init_params = [10, 0.001, 0.0, 20.0]
-
-    params, params_covariance = optimize.curve_fit(test_func, x_data, y_data, p0=init_params)
-
-    print("Current file: {}".format(item))
-    print("a: {0}, b: {1}, c {2}, d {3}".format(*params))
-
-    fig = plt.figure(figsize=(6, 4))
-    ax1 = fig.add_subplot(111)
-    ax1.scatter(x_data, y_data, label='Ref. Data', color="k")
-    # plt.fill_between(x_data, y_data - y_error*0.5, y_data + y_error*0.5)
-    # plt.legend(loc='best')
-    plt.title("I: " + currents[itr] + r" $[mA]$")
-    plt.xlabel(r"Analyzer [$Deg$]")
-    plt.ylabel(r"Power [$\mu W$]")
-
-    plt.plot(x_data, test_func(x_data, *params),
-             label='Ref. Fitted', color='k')
-
-    plt.legend(loc='best')
+for itr, item in enumerate(file_list[1:]):              # loop over the data for I!=0 with file_list[1:]
 
     data = pd.read_csv(item, sep="\t")
 
@@ -63,33 +60,29 @@ for itr, item in enumerate(file_list[1:2]):              #loop over the data for
     y_data = 1e6*data["power_avg"]
     y_error = 1e6*data["power_std"]
 
-    ax1.scatter(x_data, y_data, label='Data', color=colors[itr], marker='*')
-    # plt.fill_between(x_data, y_data - y_error * 0.5, y_data + y_error * 0.5)
-    new_params, params_covariance = optimize.curve_fit(test_func_const, x_data, y_data, p0=[params[0], params[2], params[3]])
-    plt.plot(x_data_full, test_func_const(x_data_full, *new_params), color=colors[itr], label="Fitted")
-
-    plt.legend(loc='best')
+    params_I0 = params_dict["26"]
+    params_dict[temperatures[itr]], _ = optimize.curve_fit(test_func_const, x_data, y_data,
+                                                       p0=[params_I0[0], params_I0[2], params_I0[3]])
+    # print(*params_dict[temperatures[itr]])
 
     print("Current file: {}".format(item))
-    print("a: {0}, b: {1}, c {2}".format(*new_params))
+    print("a: {0}, c: {1}, d: {2}".format(*params_dict[temperatures[itr]]))
 
-    # filename = os.path.join(target_folder, currents[itr] + "_195.png")
-    # plt.savefig(filename)
+    const_model = Model(test_func_const)
+    params = const_model.make_params(a=params_I0[0], c=params_I0[2], d=params_I0[3])
+    result = const_model.fit(y_data, params, x=x_data)
 
-    phase_bias.append(new_params[1] - params[1])
+    print(const_model.param_names)
+    print(const_model.independent_vars)
+    # print(params)
+    print(result.params.valuesdict().values())
 
+    phase_bias.append(params_dict[temperatures[itr]][1] - params_dict["26"][1])
 
-fig = plt.figure(figsize=(6, 4))
-ax1 = fig.add_subplot(111)
-plt.plot(phase_bias,color="m")
-plt.title("Phase Bias")
-plt.xticks(np.arange(len(currents)), currents, rotation=45)
-filename = os.path.join(target_folder, "phase_bias_195.png")
-# plt.savefig(filename)
-
-plt.show()
-
-
-
+# Store data
+# data_file_name = "data_" + base + ".pickle"
+# data_file_name = os.path.join(os.path.join(target_folder, data_file_name))
+# with open(data_file_name, "wb") as f:
+#     pickle.dump((temperatures, params_dict, phase_bias), f)
 
 print("Done....Goodbye")
