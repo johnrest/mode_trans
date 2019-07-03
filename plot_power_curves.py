@@ -7,11 +7,6 @@ import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
 
-def test_func_const(x, a, c, d):
-    return a * np.sin(params_dict["26"][1] * x - c) + d
-
-# def test_func(x, a, b, c, d):
-#     return a * np.sin(abs(b) * x - c) + d
 
 target_folder = "D:/Research/ModeTransformation/Data/2019_03_04/"
 base = "195"
@@ -24,17 +19,22 @@ data_file_name = os.path.join(os.path.join(target_folder, data_file_name))
 
 temperatures, params_dict, phase_bias = pickle.load(open(data_file_name, "rb"))
 
+
+def test_func_const(x, a, c, d):
+    return a * np.sin((2*np.pi*params_dict[temperatures[0]][1]) * (x*(np.pi/180)) - c) + d
+
 # Read data for I=0000
 data = pd.read_csv(file_list[0], sep="\t")
 x_data_I0 = data["analyzer"]
 y_data_I0 = 1e6 * data["power_avg"]
 
 for itr, item in enumerate(file_list[1:]):              # loop over the data for I!=0 with file_list[1:]
+    itr = itr+1
     fig = plt.figure(figsize=(6, 4))
     ax1 = fig.add_subplot(111)
 
     s1, = plt.plot(x_data_I0, y_data_I0, color="black", marker='o', linestyle="None")
-    params_I0 = params_dict["26"]
+    params_I0 = params_dict[temperatures[0]]
     l1, = plt.plot(x_data_I0, test_func_const(x_data_I0, *[params_I0[0], params_I0[2], params_I0[3]]),
                    color="black")
     legend1 = plt.legend([l1], [r"T=26[$^{\circ}C$]"], loc=2)
@@ -46,9 +46,9 @@ for itr, item in enumerate(file_list[1:]):              # loop over the data for
     y_error = 1e6*data["power_std"]
 
     s2, = plt.plot(x_data, y_data, color=colors[itr], marker='*', linestyle="None")
-    params_I0 = params_dict["26"]
-
-    l2, = plt.plot(x_data_I0, test_func_const(x_data_I0, *params_dict[temperatures[itr]]), color=colors[itr])
+    params_I = params_dict[temperatures[itr]]
+    l2, = plt.plot(x_data_I0, test_func_const(x_data_I0, *[params_I[0], params_I[2], params_I[3]]),
+                   color=colors[itr])
 
     # plt.legend([s2,l2], [r"Data. I=0.17 [$mA$]", r"Fitted. I=0.17 [$mA$]"], loc=4)
     plt.legend([l2], [r"T=" + temperatures[itr] + r"[$^{\circ}C$]"], loc=4)
@@ -58,7 +58,7 @@ for itr, item in enumerate(file_list[1:]):              # loop over the data for
     plt.ylabel(r"Power [$\mu W$]")
 
     print("Current file: {}".format(item))
-    print("a: {0}, c: {1}, d: {2}".format(*params_dict[temperatures[itr]]))
+    print("a: {0}, b: {1}, c: {2}, d: {3}".format(*params_dict[temperatures[itr]]))
 
     # filename = os.path.join(target_folder, temperatures[itr] + "_195.pdf")
     # plt.savefig(filename, format="pdf")
