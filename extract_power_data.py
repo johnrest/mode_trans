@@ -14,7 +14,7 @@ def std_slice(data_local, step):
     return [np.std(data_local[i * step:i * step + step]) for i in range(int(len(data_local) / step))]
 
 target_folder = r"D:/Research/ModeTransformation/Data/2019_03_04/"
-file_base = "I1070P285"
+file_base = "I0140P195"
 filename_mask = file_base+"*.txt"
 images_list = glob.glob(os.path.join(target_folder, filename_mask))     # Get image list to process
 
@@ -34,7 +34,7 @@ power_data_av = average_slice(power_data, 10)
 power_data_std = std_slice(power_data,10)
 
 # analyzer_angle = range(110, 320, 10)                    #Run for I=0
-analyzer_angle = [110, 180, 250, 310]                 #Run for I!=0
+analyzer_angle = [110, 190, 280, 310]                 #Run for I!=0
 len(power_data_av)
 
 data = pd.DataFrame(np.column_stack([analyzer_angle, power_data_av, power_data_std]),

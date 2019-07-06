@@ -13,12 +13,12 @@ def test_func(x, a, b, c, d):
 
 # Parameters
 target_folder = "D:/Research/ModeTransformation/Data/2019_03_04/"
-base = "195"
+base = "285"
 file_mask = "I*" + base + "*_newdata.csv"
 file_list = glob.glob(os.path.join(os.path.join(target_folder, file_mask)))
 # colors = cm.rainbow(np.linspace(0, 1, len(file_list)))
 currents = ["140", "280", "410", "530", "640", "740", "830", "910", "990", "1070"]
-temperatures = [ "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46"]
+temperatures = ["26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "46"]
 
 # Dictionary to store the fitted params for each current
 params_dict = dict()

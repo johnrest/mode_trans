@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 
 
 target_folder = "D:/Research/ModeTransformation/Data/2019_03_04/"
+results_folder = os.path.join(target_folder, "png")
+os.makedirs(results_folder, exist_ok=True)
+
 base = "195"
 file_mask = "I*" + base + "*_newdata.csv"
 file_list = glob.glob(os.path.join(os.path.join(target_folder, file_mask)))
@@ -60,9 +63,16 @@ for itr, item in enumerate(file_list[1:]):              # loop over the data for
     print("Current file: {}".format(item))
     print("a: {0}, b: {1}, c: {2}, d: {3}".format(*params_dict[temperatures[itr]]))
 
-    # filename = os.path.join(target_folder, temperatures[itr] + "_195.pdf")
-    # plt.savefig(filename, format="pdf")
+    filename = os.path.join(results_folder, temperatures[itr] + "_"+base+".png")
+    plt.savefig(filename, format="png")
 
+    # fig = plt.figure(figsize=(6, 4))
+    # ax2 = fig.add_subplot(111)
+    # y_data_I0 = test_func_const(x_data_I0, *[params_I0[0], params_I0[2], params_I0[3]])
+    # y_data_I = test_func_const(x_data_I0, *[params_I[0], params_I[2], params_I[3]])
+    # efficiency = [yI/yI0 for yI, yI0 in zip(y_data_I, y_data_I0)]
+    #
+    # l3, = plt.plot(x_data_I0, efficiency,color="black")
 
 fig = plt.figure(figsize=(6, 4))
 ax1 = fig.add_subplot(111)
@@ -71,7 +81,7 @@ plt.xticks(np.arange(len(temperatures)), temperatures, rotation=0)
 plt.xlabel(r"Temperature [$^{\circ}C$]")
 plt.ylabel(r"$\Delta \Phi$ [$rads$]")
 
-# filename = os.path.join(target_folder, "phase_bias_195.png")
-# plt.savefig(filename)
+filename = os.path.join(results_folder, "phase_bias_"+base+".png")
+plt.savefig(filename, format="png")
 
-plt.show()
+# plt.show()
